@@ -11,21 +11,63 @@
     <script>
         osql.requireLogin();//すべてのページに入れる．google認証をして，osql.connect()や，osql.getMe()を使えるようにしてくれる．
 
-        $().ready(function () {
-            doHello();
+        $().ready(function() {
+            doSelect('%');
         });
 
-        async function doHello() {
-            document.getElementById('result').innerHTML = 'hello!';
+        function button1Pressed() {
+            doInsert();
         }
+
+        function button2Pressed() {
+            var SWS = document.getElementById("Search").value;
+            doSelect(SWS);
+        }
+
+        async function doInsert() {
+            var userid = document.getElementById('tf1').value;
+            var tweet = document.getElementById('tf2').value;
+
+            var sql = `insert into Tweets (name, tweet, time) values("${userid}", "${tweet}", now());`;
+            var objects = await osql.connect(sql);
+
+            document.getElementById('result').innerHTML = "tweetしました";
+            document.getElementById('tf2').value = "";
+        }
+
+        async function doSelect(SWS) {
+            var sql = 'select * from Tweets where tweet like "%' + SWS + '%"  order by time desc limit 20';
+            var objects = await osql.connect(sql);
+            console.log(objects);
+            var html = '';
+            html = html + '<ul>';
+            for (var i = 0; i < objects.length; i++) {
+                var object = objects[i];
+                html = html + '<li>'+ object.id + ',' + object.name + ',' + object.tweet + ',' + object.time + '</li>';
+            }
+            html = html + '</ul>';
+            document.getElementById('result2').innerHTML = html;
+        }
+    
     </script>
 
 </head>
 
 <body>
-    <h1>Hello</h1>
+    <h1>Tweets</h1>
+    <br>
+    名前:<input id="tf1" value="名無し" type="textfield">
+    <br>
+    tweet:<input id="tf2" type="textfield">
+    <button onclick="button1Pressed()">tweet</button>
+    <br>
+    <p id="result"></p>
     <hr>
-    <p id="result">xxxx</p>
+    <h1>Search</h1>
+    <input type="text" id="Search">
+    <button onclick="button2Pressed()">X</button>
+    <hr>
+    <p id="result2">xxxx</p>
 </body>
 
 </html>
